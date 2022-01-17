@@ -5,6 +5,8 @@ const AWS = require('aws-sdk'),
   UTF8CHARSET = 'UTF-8';
 
 exports.handler = async event => {
+  let origin = FROM_EMAIL;
+  
   if (event.httpMethod === 'OPTIONS') {
     return processResponse(true);
   }
@@ -25,6 +27,10 @@ exports.handler = async event => {
   if (emailData.ccEmails) {
     destination.CcAddresses = emailData.ccEmails;
   }
+  
+  if (emailData.fromEmail) {
+    origin = emailData.fromEmail
+  }
 
   const body = (emailData.message && isHTML(emailData.message)) ?
     { Html: { Charset: UTF8CHARSET, Data: emailData.message } } :
@@ -39,7 +45,7 @@ exports.handler = async event => {
         Data: emailData.subject
       }
     },
-    Source: FROM_EMAIL
+    Source: origin
   };
 
   if (emailData.replyToEmails && Array.isArray(emailData.replyToEmails)) {
